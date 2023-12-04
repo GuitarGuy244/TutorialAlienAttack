@@ -1,0 +1,64 @@
+[gd_scene load_steps=10 format=3 uid="uid://5yk8er5ysbot"]
+
+[ext_resource type="Script" path="res://scripts/game.gd" id="1_een2n"]
+[ext_resource type="Texture2D" uid="uid://4bv7vqvs0oq3" path="res://assets/textures/bg.png" id="1_mn6dx"]
+[ext_resource type="PackedScene" uid="uid://cifi22r84x14u" path="res://scenes/player.tscn" id="2_2htuf"]
+[ext_resource type="PackedScene" uid="uid://b1jr1cu4dchqq" path="res://scenes/hud.tscn" id="2_wtdo6"]
+[ext_resource type="PackedScene" uid="uid://cmywcje0ouxob" path="res://scenes/enemy_spawner.tscn" id="3_5e7ed"]
+[ext_resource type="AudioStream" uid="uid://4dyndc8ks5h4" path="res://assets/audio/hit.wav" id="6_sothu"]
+[ext_resource type="AudioStream" uid="uid://dkhqva66x7hac" path="res://assets/audio/explode.wav" id="7_vqi5f"]
+
+[sub_resource type="GDScript" id="GDScript_bq8ww"]
+script/source = "extends Area2D
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	pass
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6edyv"]
+size = Vector2(84, 786)
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_een2n")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="HUD" parent="UI" instance=ExtResource("2_wtdo6")]
+
+[node name="Background" type="TextureRect" parent="."]
+offset_right = 1282.0
+offset_bottom = 720.0
+texture = ExtResource("1_mn6dx")
+stretch_mode = 1
+
+[node name="Player" parent="." instance=ExtResource("2_2htuf")]
+position = Vector2(83, 343)
+
+[node name="EnemySpawner" parent="." instance=ExtResource("3_5e7ed")]
+
+[node name="Deathzone" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 2
+script = SubResource("GDScript_bq8ww")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Deathzone"]
+position = Vector2(-174, 360)
+shape = SubResource("RectangleShape2D_6edyv")
+
+[node name="EnemyHitSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("6_sothu")
+
+[node name="PlayerHitSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("7_vqi5f")
+
+[connection signal="took_damage" from="Player" to="." method="_on_player_took_damage"]
+[connection signal="enemy_spawned" from="EnemySpawner" to="." method="_on_enemy_spawner_enemy_spawned"]
+[connection signal="path_enemy_spawned" from="EnemySpawner" to="." method="_on_enemy_spawner_path_enemy_spawned"]
+[connection signal="area_entered" from="Deathzone" to="." method="_on_deathzone_area_entered"]
